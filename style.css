@@ -1,0 +1,12 @@
+p{
+    background-color: aquamarine;
+}
+body{
+    background-image: (url
+        dog 2.jpg
+        );
+}
+#Gradient{
+    height: 200;
+    background: -moz-linear-gradient(white, orange);
+}
