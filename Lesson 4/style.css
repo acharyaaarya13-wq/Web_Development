@@ -1,0 +1,43 @@
+input[type="text"] {
+    border: 5px solid blue;
+}
+
+input[type="password"] {
+    border: 5px solid green;
+}
+ul > li{
+    color: yellow;
+}
+
+h1+p{
+    font-weight: bold;
+    color: red;
+}
+
+a:hover{
+    color: red;
+}
+ul li:hover{
+    color: orange;
+}
+
+li:nth-child(2){
+    background-color: orange;
+}
+
+div:not(.class1){
+    border: 5px dashed red;
+}
+
+ul li::before{
+    content: "Fruits ";
+}
+
+a::after{
+    content: "This is a link";
+}
+
+p::first-letter{
+    font-size: 200%;
+    color: #FF7B72;
+}
