@@ -1,0 +1,79 @@
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: beige;
+    padding: 20px;
+    min-height: 1800px;
+}
+
+.Score{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: bisque;
+    color: rgb(117, 89, 4);
+    padding: 14px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: centr;
+}
+
+h1{
+    color: rgb(216, 153, 58);
+    text-align: center;
+    margin-top: 100px;
+}
+
+h2{
+    color: rgb(225, 175, 109);
+    margin-top: 30px;
+}
+
+p{
+    color: rgb(172, 123, 60);
+    margin-bottom: 10px;
+}
+
+.player{
+    position: relative;
+    display: inline-block;
+    margin-top: 15px;
+}
+
+.playercard{
+    background-color: aliceblue;
+    color: rgb(128, 72, 15);
+    border: 5px solid;
+    text-align: center;
+    font-size: 15px;
+    border-radius: 15px;
+}
+
+.winner{
+    position: absolute;
+    top: -20px;
+    right: -12px;
+    background-color: rgb(199, 115, 13);
+    color: aliceblue;
+    font-size: 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    padding: 5px 10px;
+}
+
+.soccer{
+    position: sticky;
+    top: 52px;
+    background-color: rgb(197, 132, 48);
+    color: aliceblue;
+    padding: 10px 20px;
+    font-weight: bold;
+    margin: 20px 0 10px;
+}
+
+.playeri{
+    background-color: aliceblue;
+    padding: 10px 20px;
+    margin: 8px 0px;
+    width: 200px;
+}
