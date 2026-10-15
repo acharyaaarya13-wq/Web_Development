@@ -3,66 +3,40 @@
 // ════════════════════════════════════════════════════════════════════════════
 
 // ─────────────────────────── LESSON 2 (from previous lesson) ─────────────
-export const AGE = {
-  KIDS:  'kids',
-  TEEN:  'teen',
-  ADULT: 'adult',
-};
+export const AGE = { KIDS: 'kids', TEEN: 'teen', ADULT: 'adult' };
 
 export const STAGE = {
-  NAME:       'name',
-  GREET_MOOD: 'greet_mood',
-  AGE:        'age',
-  CATEGORIES: 'categories',
-  MOVIE_MOOD: 'movie_mood',
-  LANGUAGE:   'language',
-  CHAT:       'chat',
+  NAME: 'name', GREET_MOOD: 'greet_mood', AGE: 'age',
+  CATEGORIES: 'categories', MOVIE_MOOD: 'movie_mood',
+  LANGUAGE: 'language', CHAT: 'chat',
 };
 // ─────────────────────────────────────────────────────────────────────────
 
-
-// ─────────────────────────── LESSON 3 START ──────────────────────────────
-// Handling Events and Rendering Dynamic Movie Content
-// Goal   : Define genre, mood, and language options for the chat pickers.
-// Output : Category picker, mood picker, and language picker all render.
-
+// ─────────────────────────── LESSON 3 (from previous lesson) ─────────────
 export const CATEGORIES_BY_AGE = {
-  kids: [
-    { id: 'animation', label: '🎨 Animation' },
-    { id: 'adventure', label: '🌟 Adventure' },
-    { id: 'comedy',    label: '😂 Comedy'    },
-    { id: 'fantasy',   label: '✨ Fantasy'    },
-    { id: 'musical',   label: '🎵 Musical'    },
-    { id: 'family',    label: '👨‍👩‍👧 Family'   },
+  kids:  [
+    { id: 'animation', label: '🎨 Animation' }, { id: 'adventure', label: '🌟 Adventure' },
+    { id: 'comedy',    label: '😂 Comedy'    }, { id: 'fantasy',   label: '✨ Fantasy'    },
+    { id: 'musical',   label: '🎵 Musical'   }, { id: 'family',    label: '👨‍👩‍👧 Family'  },
   ],
-  teen: [
-    { id: 'action',    label: '⚡ Action'    },
-    { id: 'adventure', label: '🌟 Adventure' },
-    { id: 'scifi',     label: '🚀 Sci-Fi'    },
-    { id: 'comedy',    label: '😂 Comedy'    },
-    { id: 'thriller',  label: '🔍 Thriller'  },
-    { id: 'romance',   label: '💕 Romance'   },
-    { id: 'superhero', label: '🦸 Superhero' },
-    { id: 'horror',    label: '👻 Horror'    },
+  teen:  [
+    { id: 'action',    label: '⚡ Action'    }, { id: 'adventure', label: '🌟 Adventure' },
+    { id: 'scifi',     label: '🚀 Sci-Fi'    }, { id: 'comedy',    label: '😂 Comedy'    },
+    { id: 'thriller',  label: '🔍 Thriller'  }, { id: 'romance',   label: '💕 Romance'   },
+    { id: 'superhero', label: '🦸 Superhero' }, { id: 'horror',    label: '👻 Horror'    },
   ],
   adult: [
-    { id: 'action',      label: '⚡ Action'     },
-    { id: 'drama',       label: '🎭 Drama'       },
-    { id: 'thriller',    label: '🔍 Thriller'    },
-    { id: 'comedy',      label: '😂 Comedy'      },
-    { id: 'romance',     label: '💕 Romance'     },
-    { id: 'scifi',       label: '🚀 Sci-Fi'      },
-    { id: 'horror',      label: '👻 Horror'      },
-    { id: 'crime',       label: '🕵️ Crime'       },
-    { id: 'documentary', label: '📽️ Documentary' },
-    { id: 'animation',   label: '🎨 Animation'   },
+    { id: 'action',      label: '⚡ Action'     }, { id: 'drama',       label: '🎭 Drama'       },
+    { id: 'thriller',    label: '🔍 Thriller'   }, { id: 'comedy',      label: '😂 Comedy'      },
+    { id: 'romance',     label: '💕 Romance'    }, { id: 'scifi',       label: '🚀 Sci-Fi'      },
+    { id: 'horror',      label: '👻 Horror'     }, { id: 'crime',       label: '🕵️ Crime'       },
+    { id: 'documentary', label: '📽️ Documentary'}, { id: 'animation',   label: '🎨 Animation'   },
   ],
 };
 
 export const LANGUAGES = [
   'Any Language', 'English', 'Hindi', 'Kannada',
-  'Tamil', 'Telugu', 'Spanish', 'French',
-  'Japanese', 'Korean',
+  'Tamil', 'Telugu', 'Spanish', 'French', 'Japanese', 'Korean',
 ];
 
 export const MOODS_BY_AGE = {
@@ -82,5 +56,4 @@ export const MOODS_BY_AGE = {
     { label: '🎲 Surprise me!',    value: 'surprise me with something great'               },
   ],
 };
-
-// ─────────────────────────── LESSON 3 END ────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────

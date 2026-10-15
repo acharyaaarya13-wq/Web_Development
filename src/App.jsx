@@ -2,25 +2,29 @@
 // App.jsx — Root component
 // ════════════════════════════════════════════════════════════════════════════
 
-// ─────────────────────────── LESSON 2 (from previous lesson) ─────────────
-// Lesson 2 rendered: <Navbar /> + <UserPreferenceForm />
-// Lesson 3 replaces UserPreferenceForm with the full ChatPage.
-// ─────────────────────────────────────────────────────────────────────────
-
-// ─────────────────────────── LESSON 3 START ──────────────────────────────
-// Handling Events and Rendering Dynamic Movie Content
-// Goal   : Replace the preference form with the full interactive chat.
-// Output : The complete 6-step onboarding chat flow is visible and works.
-
 import { AppProvider, useApp } from './context/AppContext';
 import Navbar from './components/Navbar';
 import ChatPage from './components/HeroSection';
+import SearchModal from './components/SearchModal';
+
+// ─────────────────────────── LESSON 4 START ──────────────────────────────
+// Integrating APIs and Fetching Movie Data
+// Goal   : Add MovieModal so clicking a search result opens the detail view.
+// Output : Search icon → search overlay → click poster → full detail popup.
+import MovieModal from './components/MovieModal';
+// ─────────────────────────── LESSON 4 END ────────────────────────────────
+
 
 function AppInner() {
+  const { showModal } = useApp();
   return (
     <div className="app-root">
-      <Navbar />    {/* Lesson 2 — theme toggle + reset */}
-      <ChatPage />  {/* Lesson 3 — full onboarding chat */}
+      <Navbar />
+      <ChatPage />
+
+      {/* ─────────────────────────── LESSON 4 START ──────────────────── */}
+      {showModal && <MovieModal />}
+      {/* ─────────────────────────── LESSON 4 END ────────────────────── */}
     </div>
   );
 }
@@ -32,5 +36,3 @@ export default function App() {
     </AppProvider>
   );
 }
-
-// ─────────────────────────── LESSON 3 END ────────────────────────────────

@@ -1,19 +1,12 @@
-// ─────────────────────────── LESSON 3 START ──────────────────────────────
-// Handling Events and Rendering Dynamic Movie Content
-// Goal   : Safely render AI text and turn **bold titles** into buttons.
-// Output : Movie titles in chat are clickable chips.
+// ─── AI Text Parser ───────────────────────────────────────────────────────────
+// Converts AI reply text into safe React elements.
+// **Movie Title** → clickable chip button
 
 import React from 'react';
 
-/**
- * Convert AI reply text into safe React elements.
- * **Movie Title** → clickable <button> chip
- */
 export function parseAIText(text, onMovieClick) {
   if (!text || typeof text !== 'string') return null;
-
   const parts = text.split(/(\*\*[^*\n]{1,80}?\*\*)/g);
-
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
       const title = part.slice(2, -2).trim();
@@ -37,9 +30,6 @@ export function parseAIText(text, onMovieClick) {
   });
 }
 
-/**
- * Extract all **bold** movie titles from an AI reply.
- */
 export function extractTitles(text) {
   if (!text) return [];
   const titles = [];
@@ -51,5 +41,3 @@ export function extractTitles(text) {
   }
   return titles.slice(0, 6);
 }
-
-// ─────────────────────────── LESSON 3 END ────────────────────────────────

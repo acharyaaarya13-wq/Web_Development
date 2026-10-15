@@ -2,20 +2,29 @@
 // AppContext.jsx — Global shared state
 // ════════════════════════════════════════════════════════════════════════════
 
-// ─────────────────────────── LESSON 2 (from previous lesson) ─────────────
 import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import { STAGE, AGE } from '../constants';
+
+// ─────────────────────────── LESSON 4 START ──────────────────────────────
+// Integrating APIs and Fetching Movie Data
+// Goal   : Connect OMDb API so search and movie detail modal work.
+// Output : Search icon fetches real movies; clicking a card shows details.
+import { omdbSearch, omdbDetails } from '../utils/api';
+// ─────────────────────────── LESSON 4 END ────────────────────────────────
+
 
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
 
+  // ── Theme (Lesson 2) ────────────────────────────────────────────────────
   const [theme, setTheme] = useState(() => localStorage.getItem('cv_theme') || 'dark');
   useEffect(() => {
     document.body.className = theme === 'light' ? 'light-mode' : '';
     localStorage.setItem('cv_theme', theme);
   }, [theme]);
 
+  // ── User profile (Lesson 2) ─────────────────────────────────────────────
   const [userName,       setUserName]       = useState('');
   const [userAge,        setUserAge]        = useState(AGE.ADULT);
   const [userMood,       setUserMood]       = useState('');
@@ -25,6 +34,7 @@ export function AppProvider({ children }) {
   const userAgeRef = useRef(AGE.ADULT);
   useEffect(() => { userAgeRef.current = userAge; }, [userAge]);
 
+  // ── Chat state (Lesson 2) ───────────────────────────────────────────────
   const [stage,       setStage]       = useState(STAGE.NAME);
   const [chatMsgs,    setChatMsgs]    = useState([]);
   const [isBotTyping, setIsBotTyping] = useState(false);
@@ -43,61 +53,67 @@ export function AppProvider({ children }) {
     setIsBotTyping(false); setStage(STAGE.NAME);
     if (resetModalRef.current) resetModalRef.current();
   }, []);
-// ─────────────────────────────────────────────────────────────────────────
 
-
-// ─────────────────────────── LESSON 3 START ──────────────────────────────
-// Handling Events and Rendering Dynamic Movie Content
-// Goal   : Add callAI stub so the chat flow runs without a real API key.
-// Output : The full 6-step onboarding chat works with placeholder replies.
-//
-// NOTE: callAI here returns a hardcoded reply — real AI is wired in Lesson 5.
-
-  // callAI stub — returns a scripted reply so the chat flow works now.
-  // Replace this entire function in Lesson 5 with the real Groq API call.
+  // ── callAI stub (Lesson 3) — scripted replies, no movie recommendations ─
+  // Real Groq AI is wired in Lesson 5.
   const callAI = useCallback(async (userMessage) => {
-    // Simulate a short network delay so the typing dots appear
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 500));
     if (userMessage.toLowerCase().includes('name'))
       return "Great to meet you! How are you feeling today?";
     if (userMessage.toLowerCase().includes('feeling') || userMessage.toLowerCase().includes('mood'))
-      return "Sounds good! Let's find the perfect movie for you.";
-    return "Here are some great movies I think you'll enjoy!";
+      return "Sounds good! Let's set up your preferences.";
+    return "Got it!";
   }, []);
 
-  // callAIWithSearch stub — returns a reply with no movie results yet.
-  // Movie posters are added in Lesson 4 when OMDb is connected.
-  const callAIWithSearch = useCallback(async (userMessage) => {
-    const reply = await callAI(userMessage);
-    return { reply, movieResults: [], hasAgeSwitchOffer: false };
-  }, [callAI]);
-
-  // searchForStrip stub — returns empty array until Lesson 4 (OMDb API).
-  const searchForStrip = useCallback(async () => [], []);
-
-  // switchAge — change age mode mid-chat
+  // ── switchAge (Lesson 3) ────────────────────────────────────────────────
   const switchAge = useCallback((newAge) => {
     setUserAge(newAge);
     userAgeRef.current = newAge;
-    addMsg('bot', `Switched to ${{ [AGE.KIDS]: 'Kids mode', [AGE.TEEN]: 'Teen mode', [AGE.ADULT]: 'Adult mode' }[newAge]}!`);
+    addMsg('bot', `Switched to ${{ [AGE.KIDS]: '🔥 Trending mode', [AGE.TEEN]: '🎞️ Nostalgic mode', [AGE.ADULT]: '⭐ Popular mode' }[newAge]}!`);
   }, [addMsg]);
 
-  // isRestricted stub — always returns false until Lesson 5 adds the filter
-  const isRestricted = useCallback(() => false, []);
 
-// ─────────────────────────── LESSON 3 END ────────────────────────────────
+  // ─────────────────────────── LESSON 4 START ──────────────────────────────
+  // Integrating APIs and Fetching Movie Data
+  // Goal   : Add omdbSearch + openMovie so the search modal and detail popup work.
+
+  // searchForStrip — search OMDb and return up to 12 results
+  const searchForStrip = useCallback(async (query) => {
+    if (!query.trim()) return [];
+    try { return (await omdbSearch(query)).slice(0, 12); }
+    catch { return []; }
+  }, []);
+
+  // openMovie — fetch full details then open MovieModal
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [showModal,     setShowModal]     = useState(false);
+
+  resetModalRef.current = () => setShowModal(false);
+
+  const openMovie = useCallback((movie) => {
+    setSelectedMovie(movie);
+    setShowModal(true);
+    if (movie?.imdbID) {
+      omdbDetails(movie.imdbID)
+        .then(full => { if (full) setSelectedMovie(full); })
+        .catch(() => {});
+    }
+  }, []);
+
+  // ─────────────────────────── LESSON 4 END ────────────────────────────────
 
 
   const value = {
-    // Lesson 2
     theme, setTheme,
     userName, setUserName, userAge, setUserAge,
     userMood, setUserMood, userCategories, setUserCategories,
     userLanguage, setUserLanguage,
     stage, setStage, chatMsgs, setChatMsgs, addMsg,
     isBotTyping, setIsBotTyping, resetChat,
-    // Lesson 3
-    callAI, callAIWithSearch, searchForStrip, switchAge, isRestricted,
+    callAI, switchAge,
+    // Lesson 4
+    searchForStrip,
+    selectedMovie, showModal, setShowModal, openMovie,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

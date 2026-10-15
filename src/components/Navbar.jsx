@@ -2,7 +2,7 @@
 // Navbar.jsx — Top navigation bar
 // ════════════════════════════════════════════════════════════════════════════
 
-// ─────────────────────────── LESSON 2 (from previous lesson) ─────────────
+// ─────────────────────────── LESSON 2 + 3 (from previous lessons) ────────
 // Lesson 1 static version:
 //
 //   export default function Navbar() {
@@ -17,12 +17,14 @@
 //   }
 // ─────────────────────────────────────────────────────────────────────────
 
+// ─────────────────────────── LESSON 4 (unchanged from Lesson 2) ──────────
+// No changes to Navbar in Lesson 4 — search icon lives in HeroSection header.
+
 import { useApp } from '../context/AppContext';
 
 export default function Navbar() {
   const { theme, setTheme, resetChat } = useApp();
   const isLight = theme === 'light';
-
   return (
     <nav className="app-navbar">
       <div className="navbar-inner">

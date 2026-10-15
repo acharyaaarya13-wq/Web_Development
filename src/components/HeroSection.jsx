@@ -12,6 +12,13 @@ import { useApp } from '../context/AppContext';
 import { parseAIText } from '../utils/textParser';
 import { STAGE, AGE, CATEGORIES_BY_AGE, MOODS_BY_AGE, LANGUAGES } from '../constants';
 
+// ─────────────────────────── LESSON 4 START ──────────────────────────────
+// Integrating APIs and Fetching Movie Data
+// Goal   : Add a search icon that opens a movie search overlay.
+// Output : 🔍 icon opens SearchModal; clicking a result shows MovieModal.
+import SearchModal from './SearchModal';
+// ─────────────────────────── LESSON 4 END ────────────────────────────────
+
 function TypingDots() {
   return (
     <div className="chat-row bot-row">
@@ -144,12 +151,16 @@ export default function ChatPage() {
     stage, setStage, chatMsgs, addMsg, isBotTyping, setIsBotTyping,
     userName, setUserName, userAge, setUserAge, userMood, setUserMood,
     userCategories, setUserCategories, setUserLanguage,
-    callAI, callAIWithSearch, switchAge, isRestricted,
+    callAI, switchAge,
   } = useApp();
 
   const [inputVal,    setInputVal]    = useState('');
   const [inputActive, setInputActive] = useState(false);
   const [placeholder, setPlaceholder] = useState('Type your name to begin...');
+
+  // ─────────────────────────── LESSON 4 START ──────────────────────────────
+  const [showSearch, setShowSearch] = useState(false);
+  // ─────────────────────────── LESSON 4 END ────────────────────────────────
 
   const msgsEndRef  = useRef(null);
   const welcomeSent = useRef(false);
@@ -218,66 +229,23 @@ export default function ChatPage() {
     addMsg('bot', { type: 'language-picker', onConfirm: handleLanguageConfirm });
   }
 
-  async function handleLanguageConfirm(langs) {
+  function handleLanguageConfirm(langs) {
     setUserLanguage(langs);
     addMsg('user', langs.includes('Any Language') ? 'Any language' : langs.join(', '));
     setStage(STAGE.CHAT); setPlaceholder(`Ask me anything, ${userName || 'friend'}...`);
-    setInputActive(true); setIsBotTyping(true);
-    try {
-      const prompt = `Recommend 3 great movies for mood: "${userMood}" and genres: ${userCategories.join(', ')}.`;
-      const { reply, movieResults } = await callAIWithSearch(prompt);
-      addMsg('bot', reply || 'Here are some picks for you!');
-      if (movieResults.length) addMsg('bot', { type: 'movie-strip', movies: movieResults });
-    } catch { addMsg('bot', 'Something went wrong. Try asking me directly!'); }
-    finally { setIsBotTyping(false); }
+    setInputActive(true);
+    addMsg('bot', `You're all set, ${userName || 'friend'}! 🎬 Use the 🔍 search icon to find any movie.`);
   }
 
-  async function handleSend() {
+  function handleSend() {
     const msg = inputVal.trim();
     if (!msg || isBotTyping) return;
     setInputVal('');
     if (stage === STAGE.NAME)       { handleNameSubmit(msg); return; }
     if (stage === STAGE.GREET_MOOD) { setInputActive(false); addMsg('user', msg); handleGreetingMood(msg); return; }
     if (stage !== STAGE.CHAT)       return;
-    if (isRestricted(msg))          { addMsg('bot', 'Please ask me about movies only!'); return; }
-    addMsg('user', msg); setInputActive(false); setIsBotTyping(true);
-    try {
-      const { reply, movieResults, hasAgeSwitchOffer } = await callAIWithSearch(msg);
-      addMsg('bot', reply || 'Let me think... try asking again!');
-      if (movieResults.length) addMsg('bot', { type: 'movie-strip', movies: movieResults });
-      if (hasAgeSwitchOffer)   addMsg('bot', { type: 'age-switch-offer' });
-    } catch { addMsg('bot', 'Something went wrong. Try again!'); }
-    finally { setIsBotTyping(false); setInputActive(true); }
-  }
-
-  function renderMsg(msg) {
-    return (
-      <ChatRow key={msg.id} msg={msg} onMovieClick={async title => {
-        addMsg('user', `Tell me more about "${title}"`);
-        setInputActive(false); setIsBotTyping(true);
-        try {
-          const { reply } = await callAIWithSearch(`Tell me about "${title}" — why it's great and 2 similar picks.`);
-          addMsg('bot', reply || `"${title}" is a great pick!`);
-        } catch { addMsg('bot', `Let me find "${title}" for you!`); }
-        finally { setIsBotTyping(false); setInputActive(true); }
-      }} />
-    );
-  }
-
-  const CHIPS = {
-    'Hidden gems':         'What are some underrated hidden gem movies?',
-    'Latest movies':       'Recommend great movies from the last 2 years.',
-    'Something different': 'Recommend something completely different.',
-    'Top picks':           'What are your top movie picks right now?',
-  };
-
-  async function handleChip(chip) {
-    addMsg('user', chip); setIsBotTyping(true);
-    try {
-      const { reply, movieResults } = await callAIWithSearch(CHIPS[chip]);
-      addMsg('bot', reply || 'Here are my picks!');
-      if (movieResults.length) addMsg('bot', { type: 'movie-strip', movies: movieResults });
-    } finally { setIsBotTyping(false); }
+    addMsg('user', msg);
+    addMsg('bot', 'Use the 🔍 search icon in the header to find movies by title!');
   }
 
   return (
@@ -294,7 +262,7 @@ export default function ChatPage() {
         <div className="d-flex align-items-center gap-2">
           {stage === STAGE.CHAT && (
             <div className="age-mode-bar">
-              {[[AGE.KIDS,'🧒','Kids'],[AGE.TEEN,'🧑','Teen'],[AGE.ADULT,'🧔','Adult']].map(([key, emoji, label]) => (
+              {[[AGE.KIDS,'🔥','Trending'],[AGE.TEEN,'🎞️','Nostalgic'],[AGE.ADULT,'⭐','Popular']].map(([key, emoji, label]) => (
                 <button key={key}
                   className={`age-mode-btn ${userAge === key ? `active active-${key}` : ''}`}
                   onClick={() => switchAge(key)}>
@@ -304,23 +272,21 @@ export default function ChatPage() {
               ))}
             </div>
           )}
+          {/* ─────────────────────────── LESSON 4 START ──────────────── */}
+          <button className="search-icon-btn" onClick={() => setShowSearch(true)}
+            aria-label="Search movies" title="Search movies">
+            <i className="bi bi-search" />
+          </button>
+          {/* ─────────────────────────── LESSON 4 END ────────────────── */}
           <span className="live-pill"><span className="live-dot" />Live AI</span>
         </div>
       </div>
 
       <div className="chat-messages-area">
-        {chatMsgs.map(renderMsg)}
+        {chatMsgs.map(msg => <ChatRow key={msg.id} msg={msg} onMovieClick={null} />)}
         {isBotTyping && <TypingDots />}
         <div ref={msgsEndRef} />
       </div>
-
-      {stage === STAGE.CHAT && !isBotTyping && (
-        <div className="chat-chips">
-          {Object.keys(CHIPS).map(c => (
-            <button key={c} className="ai-suggestion-chip" onClick={() => handleChip(c)}>{c}</button>
-          ))}
-        </div>
-      )}
 
       <div className="chat-input-bar">
         <input type="text" className="chat-text-input"
@@ -335,6 +301,10 @@ export default function ChatPage() {
           <i className="bi bi-send-fill" />
         </button>
       </div>
+
+      {/* ─────────────────────────── LESSON 4 START ──────────────────── */}
+      {showSearch && <SearchModal onClose={() => setShowSearch(false)} />}
+      {/* ─────────────────────────── LESSON 4 END ────────────────────── */}
 
     </div>
   );
