@@ -4,27 +4,26 @@
 
 import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import { STAGE, AGE } from '../constants';
-
-// ─────────────────────────── LESSON 4 START ──────────────────────────────
-// Integrating APIs and Fetching Movie Data
-// Goal   : Connect OMDb API so search and movie detail modal work.
-// Output : Search icon fetches real movies; clicking a card shows details.
 import { omdbSearch, omdbDetails } from '../utils/api';
-// ─────────────────────────── LESSON 4 END ────────────────────────────────
 
+// ─────────────────────────── LESSON 5 START ──────────────────────────────
+// Using React Hooks and Building AI-Powered Recommendations
+// Goal   : Replace the callAI stub with real Groq AI + chat history.
+// Output : CineBot gives personalised replies; memory persists across turns.
+import { callGroq } from '../utils/api';
+import { MAX_CHAT_HISTORY, FILTER_WORDS } from '../constants';
+// ─────────────────────────── LESSON 5 END ────────────────────────────────
 
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
 
-  // ── Theme (Lesson 2) ────────────────────────────────────────────────────
   const [theme, setTheme] = useState(() => localStorage.getItem('cv_theme') || 'dark');
   useEffect(() => {
     document.body.className = theme === 'light' ? 'light-mode' : '';
     localStorage.setItem('cv_theme', theme);
   }, [theme]);
 
-  // ── User profile (Lesson 2) ─────────────────────────────────────────────
   const [userName,       setUserName]       = useState('');
   const [userAge,        setUserAge]        = useState(AGE.ADULT);
   const [userMood,       setUserMood]       = useState('');
@@ -34,7 +33,6 @@ export function AppProvider({ children }) {
   const userAgeRef = useRef(AGE.ADULT);
   useEffect(() => { userAgeRef.current = userAge; }, [userAge]);
 
-  // ── Chat state (Lesson 2) ───────────────────────────────────────────────
   const [stage,       setStage]       = useState(STAGE.NAME);
   const [chatMsgs,    setChatMsgs]    = useState([]);
   const [isBotTyping, setIsBotTyping] = useState(false);
@@ -54,37 +52,15 @@ export function AppProvider({ children }) {
     if (resetModalRef.current) resetModalRef.current();
   }, []);
 
-  // ── callAI stub (Lesson 3) — scripted replies, no movie recommendations ─
-  // Real Groq AI is wired in Lesson 5.
-  const callAI = useCallback(async (userMessage) => {
-    await new Promise(r => setTimeout(r, 500));
-    if (userMessage.toLowerCase().includes('name'))
-      return "Great to meet you! How are you feeling today?";
-    if (userMessage.toLowerCase().includes('feeling') || userMessage.toLowerCase().includes('mood'))
-      return "Sounds good! Let's set up your preferences.";
-    return "Got it!";
-  }, []);
-
-  // ── switchAge (Lesson 3) ────────────────────────────────────────────────
-  const switchAge = useCallback((newAge) => {
-    setUserAge(newAge);
-    userAgeRef.current = newAge;
-    addMsg('bot', `Switched to ${{ [AGE.KIDS]: '🔥 Trending mode', [AGE.TEEN]: '🎞️ Nostalgic mode', [AGE.ADULT]: '⭐ Popular mode' }[newAge]}!`);
-  }, [addMsg]);
-
-
   // ─────────────────────────── LESSON 4 START ──────────────────────────────
   // Integrating APIs and Fetching Movie Data
-  // Goal   : Add omdbSearch + openMovie so the search modal and detail popup work.
 
-  // searchForStrip — search OMDb and return up to 12 results
   const searchForStrip = useCallback(async (query) => {
     if (!query.trim()) return [];
     try { return (await omdbSearch(query)).slice(0, 12); }
     catch { return []; }
   }, []);
 
-  // openMovie — fetch full details then open MovieModal
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [showModal,     setShowModal]     = useState(false);
 
@@ -103,6 +79,59 @@ export function AppProvider({ children }) {
   // ─────────────────────────── LESSON 4 END ────────────────────────────────
 
 
+  // ─────────────────────────── LESSON 5 START ──────────────────────────────
+  // Using React Hooks and Building AI-Powered Recommendations
+  // Goal   : Replace the callAI stub with real Groq AI + chat history hook.
+  // Output : CineBot gives personalised replies; memory persists across turns.
+
+  const [chatHistory, setChatHistory] = useState([]);
+
+  const pushHistory = useCallback((role, content) =>
+    setChatHistory(prev => {
+      const next = [...prev, { role, content }];
+      return next.length > MAX_CHAT_HISTORY ? next.slice(-MAX_CHAT_HISTORY) : next;
+    }), []);
+
+  const callAI = useCallback(async (userMessage) => {
+    const currentAge = userAgeRef.current;
+    const messages = [
+      { role: 'system', content: buildSystemPrompt(userName, currentAge, userCategories, userMood, userLanguage) },
+      ...chatHistory,
+      { role: 'user', content: userMessage },
+    ];
+    const result = await callGroq(messages);
+    if (result.success) {
+      pushHistory('user', userMessage);
+      pushHistory('assistant', result.reply);
+      return result.reply;
+    }
+    return ({
+      no_key:            'No API key — add your Groq key to .env.',
+      auth:              'Invalid API key — check .env.',
+      rate_limit:        "I'm a bit overloaded. Wait a moment and try again!",
+      all_models_failed: 'All AI models are busy. Try again in a minute!',
+      timeout:           'Request timed out. Try again!',
+      network_error:     'No internet — check your connection.',
+    })[result.error] || 'Something went wrong. Please try again!';
+  }, [userName, userCategories, userMood, userLanguage, chatHistory, pushHistory]);
+
+  const callAIWithSearch = useCallback(async (userMessage) => {
+    const reply = await callAI(userMessage);
+    return { reply: reply || '', movieResults: [], hasAgeSwitchOffer: false };
+  }, [callAI]);
+
+  const isRestricted = useCallback(
+    query => FILTER_WORDS.some(w => query.toLowerCase().includes(w)), []);
+
+  const switchAge = useCallback((newAge) => {
+    setUserAge(newAge);
+    userAgeRef.current = newAge;
+    addMsg('bot', `Switched to ${{ [AGE.KIDS]: '🔥 Trending mode', [AGE.TEEN]: '🎞️ Nostalgic mode', [AGE.ADULT]: '⭐ Popular mode' }[newAge]}! What would you like to watch?`);
+  }, [addMsg]);
+
+  // ─────────────────────────── LESSON 5 END ────────────────────────────────
+
+
   const value = {
     theme, setTheme,
     userName, setUserName, userAge, setUserAge,
@@ -110,10 +139,10 @@ export function AppProvider({ children }) {
     userLanguage, setUserLanguage,
     stage, setStage, chatMsgs, setChatMsgs, addMsg,
     isBotTyping, setIsBotTyping, resetChat,
-    callAI, switchAge,
     // Lesson 4
-    searchForStrip,
-    selectedMovie, showModal, setShowModal, openMovie,
+    searchForStrip, selectedMovie, showModal, setShowModal, openMovie,
+    // Lesson 5
+    callAI, callAIWithSearch, switchAge, isRestricted,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
@@ -124,3 +153,43 @@ export function useApp() {
   if (!ctx) throw new Error('useApp must be inside <AppProvider>');
   return ctx;
 }
+
+
+// ─────────────────────────── LESSON 5 START ──────────────────────────────
+// buildSystemPrompt — builds the AI personality card sent to Groq.
+function buildSystemPrompt(name, age, categories, mood, language) {
+  const genres   = categories.length ? categories.join(', ') : 'any genre';
+  const langLine = language && !language.includes('Any Language') ? `Preferred languages: ${language.join(', ')}` : '';
+  const moodLine = mood ? `User mood: "${mood}"` : '';
+  const nameTag  = name ? ` User's name is ${name}.` : '';
+
+  // 🔥 Trending mode
+  if (age === AGE.KIDS) return `You are CineBot, a warm AI movie companion.${nameTag}
+${langLine ? langLine + '\n' : ''}${moodLine ? moodLine + '\n' : ''}
+MODE: TRENDING — Recommend movies that are currently trending and popular worldwide.
+Focus on recent releases, viral hits, and films everyone is talking about right now.
+Genres: ${genres}.
+- Wrap every title in **double asterisks** - Recommend 2-4 trending movies
+- Use emojis naturally (1-3 per response) 🔥 - Mention why each film is trending
+- Always end with a question`;
+
+  // 🎞️ Nostalgic mode
+  if (age === AGE.TEEN) return `You are CineBot, a warm AI movie companion.${nameTag}
+${langLine ? langLine + '\n' : ''}${moodLine ? moodLine + '\n' : ''}
+MODE: NOSTALGIC — Recommend classic films, beloved favorites, and nostalgic movies from past decades.
+Genres: ${genres}.
+- Wrap every title in **double asterisks** - Recommend 2-4 nostalgic movies
+- Use emojis naturally (1-3 per response) 🎞️ - Warm conversational tone
+- Always end with a question`;
+
+  // ⭐ Popular mode
+  return `You are CineBot, a warm enthusiastic AI movie companion.${nameTag}
+${langLine ? langLine + '\n' : ''}${moodLine ? moodLine + '\n' : ''}
+MODE: POPULAR — Recommend highly-rated, critically acclaimed, and widely loved films.
+Focus on crowd favourites, award winners, and films with strong audience scores.
+Genres: ${genres}.
+- Wrap every title in **double asterisks** - Recommend 2-4 popular movies
+- Use emojis naturally (1-3 per response) ⭐ - Warm conversational tone
+- Always end with a question`;
+}
+// ─────────────────────────── LESSON 5 END ────────────────────────────────

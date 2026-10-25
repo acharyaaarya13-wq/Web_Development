@@ -1,16 +1,8 @@
-// ════════════════════════════════════════════════════════════════════════════
-// MovieModal.jsx — Full-screen movie detail popup
-// ════════════════════════════════════════════════════════════════════════════
-
-// ─────────────────────────── LESSON 4 START ──────────────────────────────
-// Integrating APIs and Fetching Movie Data
-// Goal   : Show full movie details when the user clicks a poster card.
-// Output : A popup with poster, plot, cast, ratings, and an IMDb link.
+// MovieModal.jsx — unchanged from Lesson 4
 
 import { useCallback } from 'react';
 import { useApp } from '../context/AppContext';
 
-// DetailBox — shows a label + value pair; hides itself when value is missing
 function DetailBox({ label, value }) {
   if (!value || value === 'N/A') return null;
   return (
@@ -22,30 +14,18 @@ function DetailBox({ label, value }) {
 }
 
 export default function MovieModal() {
-  const {
-    selectedMovie: movie,
-    setShowModal,
-    addMsg,
-    callAIWithSearch,
-    setIsBotTyping,
-    isBotTyping,
-  } = useApp();
-
+  const { selectedMovie: movie, setShowModal, addMsg, callAIWithSearch, setIsBotTyping, isBotTyping } = useApp();
   const poster = movie?.Poster && movie.Poster !== 'N/A' ? movie.Poster : null;
   const handleClose = useCallback(() => setShowModal(false), [setShowModal]);
 
-  // "Ask CineBot" — closes the modal and sends a query to the chat
   const handleAskBot = useCallback(async () => {
     handleClose();
     if (!movie?.Title) return;
     addMsg('user', `Tell me more about "${movie.Title}"`);
     setIsBotTyping(true);
     try {
-      const { reply, movieResults } = await callAIWithSearch(
-        `Tell me about "${movie.Title}" — a brief description, why it's great, and 2 similar recommendations.`
-      );
+      const { reply } = await callAIWithSearch(`Tell me about "${movie.Title}" — a brief description, why it's great, and 2 similar recommendations.`);
       addMsg('bot', reply || `"${movie.Title}" is a great pick!`);
-      if (movieResults?.length) addMsg('bot', { type: 'movie-strip', movies: movieResults });
     } catch {
       addMsg('bot', `Ask me about "${movie.Title}" and I'll help!`);
     } finally { setIsBotTyping(false); }
@@ -56,38 +36,22 @@ export default function MovieModal() {
   return (
     <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && handleClose()}>
       <div className="modal-dialog-custom" role="dialog" aria-modal="true">
-
-        {/* Header */}
         <div className="modal-header-custom">
           <div className="d-flex align-items-center gap-3 min-w-0">
             {poster && <img src={poster} alt={movie.Title} className="modal-header-poster" />}
             <div className="min-w-0">
-              <h5 className="fw-bold mb-0 text-truncate" style={{ color: 'var(--text-primary)', fontSize: '1.05rem' }}>
-                {movie.Title}
-              </h5>
+              <h5 className="fw-bold mb-0 text-truncate" style={{ color: 'var(--text-primary)', fontSize: '1.05rem' }}>{movie.Title}</h5>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: 2 }}>
                 {[movie.Year, movie.Rated, movie.Runtime].filter(v => v && v !== 'N/A').join(' · ')}
-                {movie.imdbRating && movie.imdbRating !== 'N/A' && (
-                  <span style={{ marginLeft: 8 }}>⭐ {movie.imdbRating}</span>
-                )}
+                {movie.imdbRating && movie.imdbRating !== 'N/A' && <span style={{ marginLeft: 8 }}>⭐ {movie.imdbRating}</span>}
               </div>
-              {movie.Genre && movie.Genre !== 'N/A' && (
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 3 }}>{movie.Genre}</div>
-              )}
+              {movie.Genre && movie.Genre !== 'N/A' && <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 3 }}>{movie.Genre}</div>}
             </div>
           </div>
-          <button className="btn-icon flex-shrink-0" onClick={handleClose} aria-label="Close">
-            <i className="bi bi-x-lg" />
-          </button>
+          <button className="btn-icon flex-shrink-0" onClick={handleClose} aria-label="Close"><i className="bi bi-x-lg" /></button>
         </div>
-
-        {/* Body */}
         <div className="modal-details-body">
-          {poster && (
-            <div className="modal-details-poster-col">
-              <img src={poster} alt={movie.Title} className="modal-details-poster" />
-            </div>
-          )}
+          {poster && <div className="modal-details-poster-col"><img src={poster} alt={movie.Title} className="modal-details-poster" /></div>}
           <div className="modal-info-col">
             {movie.Plot && movie.Plot !== 'N/A' && <p className="modal-plot">{movie.Plot}</p>}
             <div className="details-grid">
@@ -102,23 +66,17 @@ export default function MovieModal() {
             </div>
             <div className="d-flex flex-wrap gap-2 mt-3">
               {movie.imdbID && (
-                <a href={`https://www.imdb.com/title/${movie.imdbID}/`}
-                  target="_blank" rel="noopener noreferrer"
-                  className="btn btn-warning btn-sm">
+                <a href={`https://www.imdb.com/title/${movie.imdbID}/`} target="_blank" rel="noopener noreferrer" className="btn btn-warning btn-sm">
                   <i className="bi bi-box-arrow-up-right me-1" />IMDb
                 </a>
               )}
-              <button className="btn btn-outline-secondary btn-sm"
-                onClick={handleAskBot} disabled={isBotTyping}>
+              <button className="btn btn-outline-secondary btn-sm" onClick={handleAskBot} disabled={isBotTyping}>
                 <i className="bi bi-stars me-1" />Ask CineBot
               </button>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );
 }
-
-// ─────────────────────────── LESSON 4 END ────────────────────────────────

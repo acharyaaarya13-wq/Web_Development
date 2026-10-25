@@ -2,7 +2,7 @@
 // constants.js
 // ════════════════════════════════════════════════════════════════════════════
 
-// ─────────────────────────── LESSON 2 (from previous lesson) ─────────────
+// ─────────────────────────── LESSON 2 + 3 + 4 (from previous lessons) ────
 export const AGE = { KIDS: 'kids', TEEN: 'teen', ADULT: 'adult' };
 
 export const STAGE = {
@@ -10,9 +10,7 @@ export const STAGE = {
   CATEGORIES: 'categories', MOVIE_MOOD: 'movie_mood',
   LANGUAGE: 'language', CHAT: 'chat',
 };
-// ─────────────────────────────────────────────────────────────────────────
 
-// ─────────────────────────── LESSON 3 (from previous lesson) ─────────────
 export const CATEGORIES_BY_AGE = {
   kids:  [
     { id: 'animation', label: '🎨 Animation' }, { id: 'adventure', label: '🌟 Adventure' },
@@ -57,3 +55,21 @@ export const MOODS_BY_AGE = {
   ],
 };
 // ─────────────────────────────────────────────────────────────────────────
+
+
+// ─────────────────────────── LESSON 5 START ──────────────────────────────
+// Using React Hooks and Building AI-Powered Recommendations
+// Goal   : Define the word filter and chat history limit used by the AI.
+// Output : The AI refuses off-topic requests; memory stays efficient.
+
+// Stored as Base64 so they are not visible as plain text in the source.
+// atob() decodes them back to strings at runtime.
+export const FILTER_WORDS = [
+  'cG9ybg==', 'eHh4', 'c2V4IHRhcGU=', 'ZXJvdGlj',
+  'bnVkZQ==', 'bmFrZWQ=', 'aGVudGFp',
+].map(w => atob(w));
+
+// Maximum number of messages kept in the AI's memory (saves API tokens)
+export const MAX_CHAT_HISTORY = 20;
+
+// ─────────────────────────── LESSON 5 END ────────────────────────────────

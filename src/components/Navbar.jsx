@@ -1,24 +1,4 @@
-// ════════════════════════════════════════════════════════════════════════════
-// Navbar.jsx — Top navigation bar
-// ════════════════════════════════════════════════════════════════════════════
-
-// ─────────────────────────── LESSON 2 + 3 (from previous lessons) ────────
-// Lesson 1 static version:
-//
-//   export default function Navbar() {
-//     return (
-//       <nav className="app-navbar">
-//         <div className="navbar-inner">
-//           <span className="navbar-brand">🎬 AI Powered CineVerse</span>
-//           <span className="nav-badge">AI Powered</span>
-//         </div>
-//       </nav>
-//     );
-//   }
-// ─────────────────────────────────────────────────────────────────────────
-
-// ─────────────────────────── LESSON 4 (unchanged from Lesson 2) ──────────
-// No changes to Navbar in Lesson 4 — search icon lives in HeroSection header.
+// Navbar.jsx — unchanged from Lesson 2
 
 import { useApp } from '../context/AppContext';
 

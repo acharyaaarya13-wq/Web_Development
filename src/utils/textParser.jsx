@@ -1,7 +1,3 @@
-// ─── AI Text Parser ───────────────────────────────────────────────────────────
-// Converts AI reply text into safe React elements.
-// **Movie Title** → clickable chip button
-
 import React from 'react';
 
 export function parseAIText(text, onMovieClick) {
@@ -10,22 +6,13 @@ export function parseAIText(text, onMovieClick) {
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
       const title = part.slice(2, -2).trim();
-      if (onMovieClick && title.length > 1) {
-        return (
-          <button key={i} className="movie-title-chip"
-            onClick={() => onMovieClick(title)} title={`Tap to search for "${title}"`}>
-            🎬 {title}
-          </button>
-        );
-      }
+      if (onMovieClick && title.length > 1)
+        return <button key={i} className="movie-title-chip" onClick={() => onMovieClick(title)}>🎬 {title}</button>;
       return <strong key={i}>{title}</strong>;
     }
     const lines = part.split('\n');
     return lines.map((line, j) => (
-      <React.Fragment key={`${i}-${j}`}>
-        {line}
-        {j < lines.length - 1 && <br />}
-      </React.Fragment>
+      <React.Fragment key={`${i}-${j}`}>{line}{j < lines.length - 1 && <br />}</React.Fragment>
     ));
   });
 }
